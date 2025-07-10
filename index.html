@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberpunk Notes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: #0a0a0a;
+            color: #00ff41;
+        }
+        .neon-border {
+            box-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41, 0 0 30px #00ff41;
+        }
+        .note-card {
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid #00ff41;
+            transition: all 0.3s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px #00ff41;
+        }
+        .cyber-button {
+            background: transparent;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            transition: all 0.3s ease;
+        }
+        .cyber-button:hover {
+            background: #00ff41;
+            color: #0a0a0a;
+        }
+        .cyber-input {
+            background: rgba(0, 255, 65, 0.05);
+            border: 1px solid #00ff41;
+            color: #00ff41;
+        }
+        .cyber-input::placeholder {
+            color: rgba(0, 255, 65, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4">
+    <div class="container mx-auto max-w-4xl">
+        <h1 class="text-4xl font-bold text-center mb-8">CYBER<span class="text-[#ff00ff]">NOTES</span></h1>
+        
+        <!-- Note Form -->
+        <div class="mb-8 p-6 neon-border rounded-lg">
+            <input type="text" id="noteTitle" placeholder="Note Title" class="cyber-input w-full mb-4 p-2 rounded">
+            <textarea id="noteContent" placeholder="Note Content" class="cyber-input w-full h-32 mb-4 p-2 rounded"></textarea>
+            <button onclick="addNote()" class="cyber-button px-6 py-2 rounded w-full">ADD NOTE</button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="mb-8">
+            <input type="text" id="searchInput" placeholder="Search notes by title..." class="cyber-input w-full p-2 rounded" oninput="searchNotes()">
+        </div>
+
+        <!-- Notes Container -->
+        <div id="notesContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+    </div>
+
+    <script>
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+
+        function addNote() {
+            const title = document.getElementById('noteTitle').value;
+            const content = document.getElementById('noteContent').value;
+            
+            if (!title || !content) {
+                alert('Please fill in both title and content!');
+                return;
+            }
+
+            const note = {
+                id: Date.now(),
+                title,
+                content,
+                date: new Date().toLocaleString()
+            };
+
+            notes.unshift(note);
+            saveNotes();
+            renderNotes();
+            clearForm();
+        }
+
+        function deleteNote(id) {
+            notes = notes.filter(note => note.id !== id);
+            saveNotes();
+            renderNotes();
+        }
+
+        function saveNotes() {
+            localStorage.setItem('notes', JSON.stringify(notes));
+        }
+
+        function clearForm() {
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteContent').value = '';
+        }
+
+        function searchNotes() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredNotes = notes.filter(note => 
+                note.title.toLowerCase().includes(searchTerm)
+            );
+            renderNotes(filteredNotes);
+        }
+
+        function renderNotes(notesToRender = notes) {
+            const container = document.getElementById('notesContainer');
+            container.innerHTML = notesToRender.map(note => `
+                <div class="note-card p-4 rounded-lg">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-xl font-bold">${note.title}</h3>
+                        <button onclick="deleteNote(${note.id})" class="text-[#ff00ff] hover:text-[#ff33ff]">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <p class="mb-2 text-sm">${note.content}</p>
+                    <small class="text-[#00ff41]/50">${note.date}</small>
+                </div>
+            `).join('');
+        }
+
+        // Initial render
+        renderNotes();
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
